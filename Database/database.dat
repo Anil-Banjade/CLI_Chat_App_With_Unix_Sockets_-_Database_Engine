@@ -1,0 +1,136 @@
+{
+  "channels": {
+    "columns": [
+      {
+        "name": "channelName",
+        "type": "text"
+      },
+      {
+        "name": "clientId",
+        "type": "text"
+      },
+      {
+        "name": "message",
+        "type": "text"
+      }
+    ],
+    "name": "channels",
+    "rows": [
+      [
+        "abcd",
+        "4",
+        "hi"
+      ],
+      [
+        "abcd",
+        "5",
+        "hi, how you doing?"
+      ],
+      [
+        "abcd",
+        "4",
+        "I am doing pretty good and what about you?"
+      ],
+      [
+        "abcd",
+        "5",
+        "I am doing fine too"
+      ],
+      [
+        "abcd",
+        "5",
+        "hello"
+      ]
+    ]
+  },
+  "check": {
+    "columns": [
+      {
+        "name": "c",
+        "type": "text"
+      }
+    ],
+    "name": "check",
+    "rows": [
+      [
+        "\"de\""
+      ]
+    ]
+  },
+  "info": {
+    "columns": [
+      {
+        "name": "column",
+        "type": "text"
+      }
+    ],
+    "name": "info",
+    "rows": [
+      [
+        "\"banjade\""
+      ]
+    ]
+  },
+  "t1": {
+    "columns": [
+      {
+        "name": "c",
+        "type": "text"
+      }
+    ],
+    "name": "t1",
+    "rows": [
+      [
+        "\"v2\""
+      ]
+    ]
+  },
+  "t2": {
+    "columns": [
+      {
+        "name": "c",
+        "type": "text"
+      }
+    ],
+    "name": "t2",
+    "rows": [
+      [
+        "\"c2\""
+      ]
+    ]
+  },
+  "table1": {
+    "columns": [
+      {
+        "name": "c",
+        "type": "text"
+      }
+    ],
+    "name": "table1",
+    "rows": []
+  },
+  "table2": {
+    "columns": [
+      {
+        "name": "channelName",
+        "type": "text"
+      },
+      {
+        "name": "clientId",
+        "type": "text"
+      },
+      {
+        "name": "message",
+        "type": "text"
+      }
+    ],
+    "name": "table2",
+    "rows": [
+      [
+        "(c1,",
+        "c2,",
+        "c3"
+      ]
+    ]
+  }
+}

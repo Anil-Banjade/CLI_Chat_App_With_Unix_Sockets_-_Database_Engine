@@ -1,0 +1,46 @@
+{
+  "channels": {
+    "columns": [
+      {
+        "name": "channelName",
+        "type": "text"
+      },
+      {
+        "name": "clientId",
+        "type": "text"
+      },
+      {
+        "name": "message",
+        "type": "text"
+      }
+    ],
+    "name": "channels",
+    "rows": [
+      [
+        "abcd",
+        "4",
+        "hi"
+      ],
+      [
+        "abcd",
+        "5",
+        "hi, how you doing?"
+      ],
+      [
+        "abcd",
+        "4",
+        "I am doing pretty good and what about you?"
+      ],
+      [
+        "abcd",
+        "5",
+        "I am doing fine too"
+      ],
+      [
+        "abcd",
+        "5",
+        "hello"
+      ]
+    ]
+  }
+}
