@@ -20,8 +20,6 @@ std::string User::getPasswordHash() const {
     return password; 
 }
 
-
-
 std::string User::hashPassword(const std::string& password) {
     EVP_MD_CTX* mdctx = EVP_MD_CTX_new();
     const EVP_MD* md = EVP_sha256();
@@ -66,20 +64,7 @@ std::string User::hashPassword(const std::string& password) {
 
 
 
-// void User::saveUsersToFile(const std::string& filename, const std::vector<User>& users) {
-//     std::ofstream file(filename);
 
-//     if (file.is_open()) {
-//         for (const auto& user : users) {
-//             file << user.getUsername() << "," << user.getPasswordHash() << "\n";
-//         }
-
-//         file.close();
-//         std::cout << "Saved users to file: " << filename << std::endl;
-//     }else{
-//         std::cerr << "Unable to open file for saving users: " << filename << std::endl;
-//     }
-// }
 
 
 

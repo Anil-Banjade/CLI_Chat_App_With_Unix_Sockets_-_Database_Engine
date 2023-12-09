@@ -36,7 +36,7 @@ int main()
         while (true)
         {
             sockaddr_in clientAddress;
-            socklen_t clientAddrLen = sizeof(clientAddress);
+            socklen_t clientAddrLen = sizeof(clientAddress); 
             int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddrLen);
 
             if (clientSocket == -1)

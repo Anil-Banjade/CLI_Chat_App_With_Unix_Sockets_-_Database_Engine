@@ -17,29 +17,9 @@
     "name": "channels",
     "rows": [
       [
-        "abcd",
+        "bct",
         "4",
         "hi"
-      ],
-      [
-        "abcd",
-        "5",
-        "hi, how you doing?"
-      ],
-      [
-        "abcd",
-        "4",
-        "I am doing pretty good and what about you?"
-      ],
-      [
-        "abcd",
-        "5",
-        "I am doing fine too"
-      ],
-      [
-        "abcd",
-        "5",
-        "hello"
       ]
     ]
   }

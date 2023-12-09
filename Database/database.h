@@ -6,12 +6,24 @@
 #include <string>
 #include <vector>
 #include <set>
+
 struct Message {
     std::string sender;
     std::string content;
 };
 
-class BTreeIndex {
+struct TableColumn {
+    std::string name;
+    std::string type;
+};
+
+struct Table {
+    std::string name;
+    std::vector<TableColumn> columns;
+    std::vector<std::vector<std::string>> rows;
+}; 
+
+class BTreeIndex { 
 public:
     void insert(const std::string& key, const std::string& value);
     std::vector<std::string> search(const std::string& value) const;
@@ -32,19 +44,12 @@ private:
     std::map<std::string, Message> tree;
 };
 
-struct TableColumn {
-    std::string name;
-    std::string type;
-};
 
-struct Table {
-    std::string name;
-    std::vector<TableColumn> columns;
-    std::vector<std::vector<std::string>> rows;
-};
 
 class SimpleDatabase {
 public:
+
+std::map<std::string, Table> tables;
     void createTable(const std::string& tableName, const std::vector<TableColumn>& columns);
     void insertRow(const std::string& tableName, const std::vector<std::string>& values);
     void getAllRows(const std::string& tableName) const;
@@ -53,8 +58,12 @@ public:
 
     std::string toLower(const std::string& str) const;
 
+    std::vector<std::string> searchByChannelName(const std::string& channelName) const;
+    void saveToFileCSV(const std::string& filename,const std::vector<std::string>& searchResults) const;
+    
 private:
-    std::map<std::string, Table> tables;
+    mutable std::vector<std::string> searchResults;
+    
     BTreePager pager;
 };
 
@@ -69,4 +78,4 @@ private:
     void parseAndExecute(const std::vector<std::string>& tokens);
 };
 
-#endif // DATABASE_H
+#endif 

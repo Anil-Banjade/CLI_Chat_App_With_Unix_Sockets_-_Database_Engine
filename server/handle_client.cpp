@@ -1,43 +1,41 @@
 // handle_client.cpp
-#include "handle_client.h"
+#include "handle_client.h" 
 #include "channel_chat.h"
-#include "../database/user.h"
-#include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
+#include "../database/user.h" 
+#include <iostream> 
+#include <unistd.h> 
+#include <sys/socket.h> 
 #include <cstring>
 #include <vector>
 #include <mutex>
 #include <algorithm>
-#include <map>
+#include <map> 
 
 #include "../utils/utils.h"
 
 #include "../Database/database.h"
-extern SimpleDatabase database;
 
+#include "LoggedInUser.h"
+
+std::vector<LoggedInUser> loggedInUsers; 
+std::mutex loggedInUsersMutex;
+
+extern SimpleDatabase database;
 
 std::vector<int> clientSockets;
 std::mutex clientSocketsMutex;
 std::vector<User> registeredUsers;
 std::mutex userMutex;
 
-// Add a mapping to store the channels each client is in
+// mapping to store the channels each client is in.
 std::map<int, std::string> clientChannels;
-
-void initializeDatabase() {
-    // Move the database initialization code here
-    database.createTable("channels", {{"channelName", "text"}, {"clientId", "text"}, {"message", "text"}});
-}
 
 
 void handle_Client(int clientSocket)
 {
     char buffer[1024];
 
-    User::loadUsersFromFile("users.csv", registeredUsers);
-
-    
+    User::loadUsersFromFile("users.csv", registeredUsers); 
 
     // for (const auto &user : registeredUsers)
     // {
@@ -50,7 +48,7 @@ void handle_Client(int clientSocket)
 
     while (true)
     {
-        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0); 
 
         if (bytesRead <= 0)
         {
@@ -58,7 +56,7 @@ void handle_Client(int clientSocket)
             std::lock_guard<std::mutex> lock(clientSocketsMutex);
             clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), clientSocket), clientSockets.end());
             close(clientSocket);
-            return;
+            return; 
         }
         buffer[bytesRead] = '\0';
 
@@ -66,7 +64,7 @@ void handle_Client(int clientSocket)
         {
             // Register a new user
             std::string userInfo(&buffer[10]);
-            size_t pos = userInfo.find(' ');
+            size_t pos = userInfo.find(' '); 
 
             if (pos != std::string::npos)
             {
@@ -84,6 +82,19 @@ void handle_Client(int clientSocket)
                 {
                     registeredUsers.emplace_back(username, User::hashPassword(password));
                     std::cout << "User '" << username << "' registered successfully.\n";
+                
+                    // Broadcast the registration success message to all clients
+                std::lock_guard<std::mutex> lockCreate(clientSocketsMutex);
+                for (const auto &socket : clientSockets)
+                {
+                    if (socket == clientSocket)
+                    {
+                        std::string registrationMessage = "\033[34mUser '" + username + "' has registered.\033[0m";
+                        //std::string registrationMessage = "User '" + username + "' has registered.";
+                        send(socket, registrationMessage.c_str(), registrationMessage.size(), 0);
+                    }
+                }
+
                 }
                 else
                 {
@@ -91,6 +102,7 @@ void handle_Client(int clientSocket)
                 }
             }
             User::saveUsersToFile("users.csv", registeredUsers);
+            std::cout<<"Registration successful \n";
         }
 
         else if (strncmp(buffer, "/login ", 7) == 0)
@@ -104,11 +116,11 @@ void handle_Client(int clientSocket)
                 std::string username = userInfo.substr(0, pos);
                 std::string password = userInfo.substr(pos + 1);
 
-                // Trim leading and trailing whitespaces from username and password
+                
                 username = trimWhitespace(username);
                 password = trimWhitespace(password);
 
-                // Debug print to check the trimmed username and password
+                
                 // std::cout << "Entered Username: " << username << ", Entered Password: " << password << "\n";
 
                 // Debug print to check the content of registeredUsers
@@ -118,7 +130,7 @@ void handle_Client(int clientSocket)
                 //     std::cout << "Username: " << user.username << ", Password Hash: " << user.password << "\n";
                 // }
 
-                std::lock_guard<std::mutex> lock(userMutex);
+                std::lock_guard<std::mutex> lock(userMutex);  
                 auto it = std::find_if(registeredUsers.begin(), registeredUsers.end(),
                                        [username](const User &user)
                                        {
@@ -137,9 +149,9 @@ void handle_Client(int clientSocket)
                     std::cout << "Stored Password Hash: " << storedPassword << "\n";
                     std::cout << "Generated Password Hash: " << generatedPassword << "\n";
 
-                    //std::cout << "length of stored password:" << storedPassword.length() << " length of registered user:" << generatedPassword.length() << "\n";
+                    // std::cout << "length of stored password:" << storedPassword.length() << " length of registered user:" << generatedPassword.length() << "\n";
 
-                    // Check if the lengths of the password hashes are the same
+                    
                     if (storedPassword.length() != generatedPassword.length())
                     {
                         std::cerr << "Invalid password.\n";
@@ -148,9 +160,26 @@ void handle_Client(int clientSocket)
                     {
                         loggedInUsername = username; // for direct message
 
+                        std::lock_guard<std::mutex> lock(loggedInUsersMutex);
+                        loggedInUsers.push_back({username, clientSocket}); // Add the user to the list
+
                         std::cout << "User '" << username << "' logged in.\n";
+                        
+                        // Broadcast the login success message to all clients
+                std::lock_guard<std::mutex> lockCreate(clientSocketsMutex);
+                for (const auto &socket : clientSockets)
+                {
+                    if (socket == clientSocket)
+                    {
+                        std::string loginMessage = "\033[34mUser '" + username + "' has logged in.\033[0m";
+                        //std::string loginMessage = "User '" + username + "' has logged in.";
+                        send(socket, loginMessage.c_str(), loginMessage.size(), 0);
+                    }
+                }
+                        
                         // Save users to file after a successful login
                         User::saveUsersToFile("users.csv", registeredUsers);
+                        
                     }
                     else
                     {
@@ -160,87 +189,149 @@ void handle_Client(int clientSocket)
             }
         }
 
-        else if (strncmp(buffer, "@", 1) == 0)
+        
+
+
+    else if (strncmp(buffer, "@", 1) == 0)
+{
+    std::string message(buffer + 1);
+    size_t pos = message.find(' ');
+
+    if (pos != std::string::npos)
+    {
+        std::string targetUser = message.substr(0, pos);
+        std::string content = message.substr(pos + 1);
+
+        std::lock_guard<std::mutex> lock(loggedInUsersMutex);
+
+        // Find the socket of the target user in the list of logged-in users
+        auto targetUserIt = std::find_if(loggedInUsers.begin(), loggedInUsers.end(),
+                                         [targetUser](const LoggedInUser &user)
+                                         {
+                                             return user.username == targetUser;
+                                         });
+
+        if (targetUserIt != loggedInUsers.end())
         {
-            std::string message(buffer + 1);
-            size_t pos = message.find(' ');
+            // Send the private message only to the target user
+            std::string formattedMessage = "(Private) \033[34m" + loggedInUsername + ": " + content + "\033[0m";
 
-            if (pos != std::string::npos)
-            {
-                std::string targetUser = message.substr(0, pos);
-                std::string content = message.substr(pos + 1);
+            //std::string formattedMessage = "(Private) " + loggedInUsername + ": " + content;
+            send(targetUserIt->socket, formattedMessage.c_str(), formattedMessage.size(), 0);
 
-                std::lock_guard<std::mutex> lock(clientSocketsMutex);
+            // Send an acknowledgment back to the sender
+            std::string ackMessage = "Private message sent to " + targetUser;
+            send(clientSocket, ackMessage.c_str(), ackMessage.size(), 0);
 
-                // Find the socket of the target user
-                auto targetSocketIt = std::find_if(clientSockets.begin(), clientSockets.end(),
-                                                   [targetUser](int socket)
-                                                   {
-                                                       std::lock_guard<std::mutex> lock(userMutex);
-                                                       auto userIt = std::find_if(registeredUsers.begin(), registeredUsers.end(),
-                                                                                  [targetUser](const User &user)
-                                                                                  {
-                                                                                      return user.getUsername() == targetUser;
-                                                                                  });
-                                                       return userIt != registeredUsers.end();
-                                                   });
-
-                if (targetSocketIt != clientSockets.end())
-                {
-                    // Send the private message only to the target user
-                    std::string formattedMessage = "(Private) " + loggedInUsername + ": " + content;
-                    send(*targetSocketIt, formattedMessage.c_str(), formattedMessage.size(), 0);
-
-                    // Send an acknowledgment back to the sender
-                    std::string ackMessage = "Private message sent to " + targetUser;
-                    send(clientSocket, ackMessage.c_str(), ackMessage.size(), 0);
-
-                    // Debugging output
-                    // std::cout << "Sent private message from " << loggedInUsername << " to " << targetUser << ": " << content << std::endl;
-                }
-                else
-                {
-                    // Send a notification if the target user is not found
-                    std::string notFoundMessage = "User " + targetUser + " not found";
-                    send(clientSocket, notFoundMessage.c_str(), notFoundMessage.size(), 0);
-
-                    // Debugging output
-                    std::cout << "User " << targetUser << " not found for private message from " << loggedInUsername << std::endl;
-                }
-            }
+            // Debugging output
+            std::cout << "Sent private message from " << loggedInUsername << " to " << targetUser << ": " << content << std::endl;
         }
+        else
+        {
+            // Send a notification if the target user is not found
+            std::string notFoundMessage = "User " + targetUser + " not found";
+            send(clientSocket, notFoundMessage.c_str(), notFoundMessage.size(), 0);
+
+            // Debugging output
+            std::cout << "User " << targetUser << " not found for private message from " << loggedInUsername << std::endl;
+        }
+    }
+}
+        
 
         else if (strncmp(buffer, "/listusers", 10) == 0)
         {
-            std::lock_guard<std::mutex> lock(clientSocketsMutex);
+            std::lock_guard<std::mutex> lock(loggedInUsersMutex);
             std::string userList = "Online Users: ";
 
-            for (const auto &socket : clientSockets)
+            for (const auto &loggedInUser : loggedInUsers)
             {
-                std::lock_guard<std::mutex> lock(userMutex);
-
-                auto it = std::find_if(registeredUsers.begin(), registeredUsers.end(),
-                                       [socket, loggedInUsername, clientSocket](const User &user)
-                                       {
-                                           return user.getUsername() == loggedInUsername && socket != clientSocket;
-                                       });
-
-                if (it != registeredUsers.end())
+                if (loggedInUser.socket != clientSocket)
                 {
-                    userList += it->getUsername() + ", ";
+                    userList += loggedInUser.username + ", ";
                 }
             }
 
-            userList = userList.substr(0, userList.size() - 2);
-            send(clientSocket, userList.c_str(), userList.size(), 0);
+            if (userList.size() > 14)
+            { // Check if there are online users
+                userList = userList.substr(0, userList.size() - 2);
+                send(clientSocket, userList.c_str(), userList.size(), 0);
+            }
+            else
+            {
+                std::string message = "No users online.";
+                send(clientSocket, message.c_str(), message.size(), 0);
+            }
         }
+
+
 
         else if (strncmp(buffer, "/create ", 8) == 0)
         {
             // Existing channel creation logic
             std::string channelName(&buffer[8]);
             create_Channel(channelName);
+
+            // Broadcast the channel creation message to all clients
+            std::lock_guard<std::mutex> lockCreate(clientSocketsMutex);
+            for (const auto &socket : clientSockets)
+            {
+                if (socket == clientSocket)
+                {
+                    std::string creationMessage = "\033[34mChannel '" + channelName + "' has been created.\033[0m";
+                    //std::string creationMessage = "Channel '" + channelName + "' has been created.";
+                    send(socket, creationMessage.c_str(), creationMessage.size(), 0);
+                }
+            }
         }
+
+        // else if (strncmp(buffer, "/join ", 6) == 0)
+        // {
+        //     std::string channelName(&buffer[6]);
+
+        //     // Check if the channel exists
+        //     std::lock_guard<std::mutex> lock(channelMutex);
+        //     auto it = channels.find(channelName);
+
+
+
+        //     if (it != channels.end())
+        //     {
+        //         // Update the clientChannels map
+        //         std::lock_guard<std::mutex> lock(clientSocketsMutex);
+        //         auto clientIt = clientChannels.find(clientSocket);
+
+        //         if (clientIt != clientChannels.end())
+        //         {
+        //             clientIt->second = channelName; // Update the channel for the client
+        //             std::cout << "Joined channel '" << channelName << "'.\n";
+        //         }
+        //         else
+        //         {
+        //             // If the client is not in the map, add it with the channel
+        //             clientChannels[clientSocket] = channelName;
+        //             std::cout << "Joined channel '" << channelName << "'.\n";
+        //         }
+
+        //         // Add the client socket to the channel in the channels map
+        //         it->second.push_back(clientSocket);
+
+        //         std::lock_guard<std::mutex> lockCreate(clientSocketsMutex);
+        //         for (const auto &socket : clientSockets)
+        //         {
+        //             if (socket == clientSocket)
+        //             {
+        //                 std::string joinMessage = "\033[34mUser '" + loggedInUsername + "' has joined channel "+ channelName + "'.\033[0m";
+        //                 //std::string joinMessage = "User '" + loggedInUsername + "' has joined channel '" + channelName + "'.";
+        //                 send(socket, joinMessage.c_str(), joinMessage.size(), 0);
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         std::cerr << "Channel '" << channelName << "' does not exist.\n";
+        //     }
+        // }
 
         else if (strncmp(buffer, "/join ", 6) == 0)
         {
@@ -308,7 +399,8 @@ void handle_Client(int clientSocket)
                     std::cout << "\n";
 
                     // Include sender and channel information in the message
-                    std::string formattedMessage = "Channel '" + channelName + "', User '" + std::to_string(clientSocket) + "': " + message;
+                    //std::string formattedMessage = "Channel '" + channelName + "', User '" + std::to_string(clientSocket) + "': " + message;
+                    std::string formattedMessage = "\033[34mChannel '" + channelName + "', User '" + std::to_string(clientSocket) + "': " + message + "\033[0m";
 
                     // Send the message to all clients in the channel, excluding the sender
                     for (const auto &client : channels[channelName])

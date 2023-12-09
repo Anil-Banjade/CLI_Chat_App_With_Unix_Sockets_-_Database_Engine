@@ -7,15 +7,13 @@
 #include <cstring>
 #include <sys/socket.h> 
 
-std::map<std::string,std::vector<int>> channels;
+std::map<std::string,std::vector<int>> channels; 
 
-
-
-std::mutex channelMutex;
+std::mutex channelMutex; 
 
 void create_Channel(const std::string& channelName) { 
     std::lock_guard<std::mutex> lock(channelMutex);
-    channels[channelName] = std::vector<int>();
+    channels[channelName] = std::vector<int>(); 
     std::cout << "Channel '" << channelName << "' created successfully.\n";
 }
 

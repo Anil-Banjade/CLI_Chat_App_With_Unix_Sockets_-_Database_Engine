@@ -54,9 +54,10 @@ std::cout<<"\n";
         else if (strncmp(message, "/create ", 8) == 0)
         {
             strcpy(channelName, &message[8]);
-            std::cout << "inside client channel creation.\n";
+            // std::cout << "inside client channel creation.\n";
             // send_To_Channel(clientSocket, channelName, message);
             send(clientSocket, message, strlen(message), 0);
+            
         }
         else if (strncmp(message, "/channel ", 9) == 0)
         {
@@ -71,6 +72,7 @@ std::cout<<"\n";
 
                 // Send the message to the specified channel
                 send(clientSocket, message, strlen(message), 0);
+                std::cout << "Message sent to channel.\n";
             }
         }
         else if (strncmp(message, "@", 1) == 0)

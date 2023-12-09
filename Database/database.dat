@@ -17,119 +17,62 @@
     "name": "channels",
     "rows": [
       [
-        "abcd",
-        "4",
+        "cd",
+        "5",
         "hi"
       ],
       [
-        "abcd",
-        "5",
-        "hi, how you doing?"
-      ],
-      [
-        "abcd",
+        "cd",
         "4",
-        "I am doing pretty good and what about you?"
-      ],
-      [
-        "abcd",
-        "5",
-        "I am doing fine too"
-      ],
-      [
-        "abcd",
-        "5",
         "hello"
-      ]
-    ]
-  },
-  "check": {
-    "columns": [
-      {
-        "name": "c",
-        "type": "text"
-      }
-    ],
-    "name": "check",
-    "rows": [
+      ],
       [
-        "\"de\""
-      ]
-    ]
-  },
-  "info": {
-    "columns": [
-      {
-        "name": "column",
-        "type": "text"
-      }
-    ],
-    "name": "info",
-    "rows": [
+        "rma",
+        "4",
+        "rma is the best club in the club."
+      ],
       [
-        "\"banjade\""
+        "rma",
+        "6",
+        "there is no doubt"
       ]
     ]
   },
-  "t1": {
+  "t6": {
     "columns": [
       {
-        "name": "c",
-        "type": "text"
-      }
-    ],
-    "name": "t1",
-    "rows": [
-      [
-        "\"v2\""
-      ]
-    ]
-  },
-  "t2": {
-    "columns": [
-      {
-        "name": "c",
-        "type": "text"
-      }
-    ],
-    "name": "t2",
-    "rows": [
-      [
-        "\"c2\""
-      ]
-    ]
-  },
-  "table1": {
-    "columns": [
-      {
-        "name": "c",
-        "type": "text"
-      }
-    ],
-    "name": "table1",
-    "rows": []
-  },
-  "table2": {
-    "columns": [
-      {
-        "name": "channelName",
+        "name": "c2",
         "type": "text"
       },
       {
-        "name": "clientId",
-        "type": "text"
-      },
-      {
-        "name": "message",
+        "name": "c3",
         "type": "text"
       }
     ],
-    "name": "table2",
+    "name": "t6",
     "rows": [
       [
-        "(c1,",
-        "c2,",
-        "c3"
+        "\"hi\",",
+        "\"hi\""
+      ]
+    ]
+  },
+  "tab7": {
+    "columns": [
+      {
+        "name": "c2",
+        "type": "text"
+      },
+      {
+        "name": "c3",
+        "type": "text"
+      }
+    ],
+    "name": "tab7",
+    "rows": [
+      [
+        "hi,",
+        "hi"
       ]
     ]
   }
